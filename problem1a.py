@@ -1,6 +1,12 @@
+"""
+CLASS (NODE/POINTER) IMPLEMENTATION
+"""
+
+
 # Importing the required libraries
 import networkx as nx
 import matplotlib.pyplot as plt
+import time as time
 
 # Defining the Vertex class to represent vertices in the graph
 class Vertex:
@@ -71,8 +77,10 @@ class HomogenousAmalgamatedStar:
 
 # Creating an instance of the HomogenousAmalgamatedStar class
 n = 3
-homogenous_star = HomogenousAmalgamatedStar(n)
 
+# Start the timer
+start_time = time.time()
+homogenous_star = HomogenousAmalgamatedStar(n)
 # Converting the graph to a NetworkX graph
 G = homogenous_star.to_networkx_graph()
 
@@ -82,7 +90,13 @@ nx.draw(G, pos, with_labels=True, node_size=700, node_color="skyblue", font_size
 edge_labels = nx.get_edge_attributes(G, 'label')  # Getting edge labels
 nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)  # Drawing edge labels
 
+# Calculate and print execution time
+execution_time = time.time() - start_time
+print("Execution time: ", execution_time, "seconds")
+
 # Displaying the plot
 plt.title("Homogenous Amalgamated Star Graph")
 plt.show()
+
+
 
