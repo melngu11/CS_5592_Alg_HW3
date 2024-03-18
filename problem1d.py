@@ -1,4 +1,5 @@
 # Importing the necessary libraries
+from collections import deque
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -23,7 +24,7 @@ class Graph:
         self.weights[(v, u)] = weight
 
     # Method to assign labels to vertices using a specific algorithm
-    def assign_labels(self):
+    def assign_labels_greedy(self):
         # Calculating the maximum label allowed based on the formula provided
         k = (3 * self.n + 1) // 2
         # Set to keep track of labels already used
@@ -43,6 +44,51 @@ class Graph:
             # Assigning the label to the current vertex and updating the set of used labels
             self.labels[v] = label
             labels_used.add(label)
+        # Method to assign labels to vertices using backtracking with constraint satisfaction
+    def assign_labels_backtracking(self):
+        # Calculating the maximum label allowed based on the formula provided
+        k = (3 * self.n + 1) // 2
+        
+        # Create a list to store the solution
+        solution = [None] * (self.vertices + 1)
+        
+        # Initialize the labels_used set
+        labels_used = set()
+        
+        # Call the backtracking function to find a valid assignment
+        self.backtrack(1, solution, labels_used, k)
+        
+        # Update the labels dictionary with the solution
+        for v in range(1, self.vertices + 1):
+            self.labels[v] = solution[v]
+
+    # Backtracking function to assign labels recursively
+    def backtrack(self, v, solution, labels_used, k):
+        # Base case: if all vertices are assigned labels
+        if v == self.vertices + 1:
+            return True  # Solution found
+        
+        # Get the set of labels used by neighboring vertices
+        neighbors_labels = {solution[u] for u in self.adjacency_list[v] if solution[u] is not None}
+        
+        # Find available labels that are not used by neighboring vertices
+        available_labels = set(range(1, k + 1)) - neighbors_labels
+        
+        # Try assigning each available label to the current vertex
+        for label in sorted(available_labels):
+            solution[v] = label
+            labels_used.add(label)
+            
+            # Recursively call backtrack for the next vertex
+            if self.backtrack(v + 1, solution, labels_used, k):
+                return True  # Solution found
+            
+            # Backtrack: remove the label and try the next one
+            solution[v] = None
+            labels_used.remove(label)
+        
+        return False  # No solution found
+
 
     # Method to print the labels of vertices and weights of edges
     def print_labels_and_weights(self):
@@ -54,6 +100,45 @@ class Graph:
         print("\nEdge Weights:")
         for edge, weight in self.weights.items():
             print(f"Edge {edge}: Weight {weight}")
+    
+    def visualize_graph(self):
+        G = nx.Graph(self.adjacency_list)
+        pos = nx.spring_layout(G)
+        nx.draw(G, pos, with_labels=False, node_color='skyblue', node_size=1500)
+        labels = {i: self.labels[i] for i in range(1, self.vertices + 1)}
+        nx.draw_networkx_labels(G, pos, labels=labels, font_color='black')
+        edge_labels = nx.get_edge_attributes(G, 'weight')
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+        nx.draw_networkx_edges(G, pos)
+        plt.show()
+    
+    def bfs(self, start):
+        visited = set()
+        queue = deque()
+        queue.append((start, [start]))  # Keep track of the path
+        visited.add(start)
+        while queue:
+            vertex, path = queue.popleft()
+            print(vertex, end=' ')
+            for neighbor in self.adjacency_list[vertex]:
+                if neighbor not in visited:
+                    queue.append((neighbor, path + [neighbor]))  # Append neighbor to the current path
+                    visited.add(neighbor)
+        return path  # Return the path taken during BFS traversal
+    def dfs(self, start):
+        visited = set()
+        stack = [(start, [start])]  # Stack to track current vertex and path
+        path = []  # Variable to store the final path
+        while stack:
+            vertex, current_path = stack.pop()
+            if vertex not in visited:
+                path = current_path  # Update the path
+                visited.add(vertex)
+                print(vertex, end=' ')
+                for neighbor in self.adjacency_list[vertex]:
+                    stack.append((neighbor, current_path + [neighbor]))  # Append neighbor to the current path
+        return path  # Return the path taken during DFS traversal
+
 
 # Test code to create and visualize the graph
 # Creating a graph object with n = 3
@@ -65,24 +150,19 @@ for i in range(1, star_graph.vertices):
     star_graph.add_edge(i, star_graph.vertices, i)
 
 # Assigning labels to the vertices
-star_graph.assign_labels()
+star_graph.assign_labels_greedy()
+# star_graph.assign_labels_backtracking()
 
 # Printing labels and weights of the graph
 star_graph.print_labels_and_weights()
+star_graph.visualize_graph()
 
-# Creating a graph object from the adjacency list using networkx
-G = nx.Graph(star_graph.adjacency_list)
+start_vertex = 1
+print("\nBFS Traversal:")
+path = star_graph.bfs(start_vertex)
+print("\nPath taken during BFS traversal:", path)
 
-# Drawing the graph with vertex labels and edge weights using matplotlib
-pos = nx.spring_layout(G)  # Positions for all nodes
-nx.draw(G, pos, with_labels=True, font_weight='bold', node_color='skyblue', node_size=1500)  # Drawing nodes
-# Drawing labels for nodes
-labels = {i: star_graph.labels[i] for i in range(1, star_graph.vertices + 1)}
-nx.draw_networkx_labels(G, pos, labels=labels)
-# Drawing labels for edges
-edge_labels = nx.get_edge_attributes(G, 'weight')
-nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-
-# Displaying the graph
-plt.show()
+print("\nDFS Traversal:")
+path = star_graph.dfs(start_vertex)
+print("\nPath taken during DFS traversal:", path)
 
