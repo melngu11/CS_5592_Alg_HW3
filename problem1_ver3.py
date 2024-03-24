@@ -1,3 +1,8 @@
+
+"""
+CLASS (NODE/POINTER) IMPLEMENTATION
+"""
+
 import time as time
 
 class Vertex:

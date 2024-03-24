@@ -1,3 +1,7 @@
+"""
+ADJACENCY LIST IMPLENTATION
+"""
+
 # Importing the necessary libraries
 from collections import deque
 import networkx as nx
@@ -104,7 +108,7 @@ class Graph:
     def visualize_graph(self):
         G = nx.Graph(self.adjacency_list)
         pos = nx.spring_layout(G)
-        nx.draw(G, pos, with_labels=False, node_color='skyblue', node_size=1500)
+        nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=1500)
         labels = {i: self.labels[i] for i in range(1, self.vertices + 1)}
         nx.draw_networkx_labels(G, pos, labels=labels, font_color='black')
         edge_labels = nx.get_edge_attributes(G, 'weight')
@@ -125,6 +129,7 @@ class Graph:
                     queue.append((neighbor, path + [neighbor]))  # Append neighbor to the current path
                     visited.add(neighbor)
         return path  # Return the path taken during BFS traversal
+    
     def dfs(self, start):
         visited = set()
         stack = [(start, [start])]  # Stack to track current vertex and path
@@ -142,7 +147,7 @@ class Graph:
 
 # Test code to create and visualize the graph
 # Creating a graph object with n = 3
-n = 3
+n = 4
 star_graph = Graph(n)
 
 # Adding edges and weights to the graph
