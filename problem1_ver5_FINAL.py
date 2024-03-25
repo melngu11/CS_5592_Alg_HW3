@@ -62,7 +62,10 @@ def assign_labels(graph):
     return vertex_labels, edge_labels
 
 def main():
+    # Number of outer vertices in the star
     n = int(input("Enter the value of n: "))
+
+    # Initialize graph
     graph = Graph(n)
 
     # Adding edges for the star graph
@@ -88,7 +91,7 @@ def main():
         for neighbor in neighbors:
             G.add_edge(vertex, neighbor, label=edge_labels[(vertex, neighbor)])
 
-    pos = nx.spring_layout(G)
+    pos = nx.spring_layout(graph)
     nx.draw(G, pos, with_labels=True, labels=vertex_labels, node_size=1000)
     edge_labels = nx.get_edge_attributes(G, 'label')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
