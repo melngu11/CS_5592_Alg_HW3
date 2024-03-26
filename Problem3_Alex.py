@@ -117,7 +117,7 @@ def main():
     nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', width=2, linewidths=1, node_size=700, labels={node: f"{node}\n{label}" for node, label in vertex_labels.items()}, font_size=10)
     edge_labels = nx.get_edge_attributes(G, 'label')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8)
-    plt.title('Modified Star Graph with Edge Irregular K-Labeling')
+    plt.title('Snowflake Graph with Edge Irregular K-Labeling')
     plt.axis('off')  # Turn off the axis
     plt.show()
 
