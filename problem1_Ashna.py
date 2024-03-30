@@ -1,13 +1,8 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-import time 
-
-
 class Graph:
     def __init__(self, n):
         """
         Initializes a graph object with a given number of nodes.
-        
+
         Args:
             n (int): The number of nodes.
         """
@@ -18,11 +13,11 @@ class Graph:
     def add_edge(self, u, v, label):
         """
         Adds an edge between two nodes with a given label.
-    
+
         Args:
-        u (int): One end of the edge.
-        v (int): The other end of the edge.
-        label (int): The label to be assigned to the edge.
+            u (int): One end of the edge.
+            v (int): The other end of the edge.
+            label (int): The label to be assigned to the edge.
         """
         self.adj_list[u].append(v)
         self.adj_list[v].append(u)
@@ -32,32 +27,44 @@ class Graph:
 
 def assign_labels(graph):
     """
-    Assigns vertex and edge labels to the graph using edge irregular k-labeling scheme.
+    Assigns vertex and edge labels to the graph using edge irregular k-labeling and vertex k-labeling scheme.
 
     Edge Irregular k-labeling:
-    assigns labels to both vertices and edges such that the maximum label on any edge incident to a vertex is the label of that vertex. 
-    
+    assigns labels to both vertices and edges such that the maximum label on any edge incident to a vertex is the label of that vertex.
+
+    Vertex k-labeling:
+    assigns labels to vertices such that the maximum label on any edge incident to a vertex is at most k.
+
     Args:
         graph (Graph): The graph object to which labels will be assigned.
-        
+
     Returns:
         tuple: A tuple containing dictionaries of vertex labels and edge labels.
     """
     vertex_labels = {}  # Dictionary to store vertex labels
     edge_labels = {}  # Dictionary to store edge labels
     k = (3 * graph.n + 1) // 2
-    
-    # Greedy labeling starting from central vertex
-    vertex_labels[0] = min(graph.n + 1, k)  # Labeling the center vertex
+
+    # Labeling the center vertex
+    vertex_labels[0] = min(graph.n + 1, k)
+
+    # Labeling the outer vertices
     for i in range(1, graph.n + 1):
-        vertex_labels[i] = min(i, k)
-        vertex_labels[graph.n + i] = min(i, k)
-        vertex_labels[2 * graph.n + i] = min(i, k)
+        label = min(i, k)
+        vertex_labels[i] = label
+        vertex_labels[graph.n + i] = label
+        vertex_labels[2 * graph.n + i] = label
+
+    # Adjust vertex 0 labeling for even and odd n
+    if graph.n % 2 == 0:  # When n is even
+        vertex_labels[0] = 3 * graph.n // 2
+    else:  # When n is odd
+        vertex_labels[0] = (3 * graph.n + 1) // 2
 
     # Assigning edge labels
     for vertex, neighbors in graph.adj_list.items():
         for neighbor in neighbors:
-            edge_label = max(vertex_labels[vertex], vertex_labels[neighbor])
+            edge_label = min(vertex_labels[vertex], vertex_labels[neighbor])  # Use minimum of incident vertex labels
             edge_labels[(vertex, neighbor)] = edge_label
             edge_labels[(neighbor, vertex)] = edge_label
 
@@ -65,10 +72,30 @@ def assign_labels(graph):
 
 
 
-def main(n):
-    # Number of outer vertices in the star
-    # n = int(input("Enter the value of n: "))
+def verify_labels(graph, vertex_labels, edge_labels):
+    """
+    Verifies the correctness of vertex and edge labels.
 
+    Args:
+        graph (Graph): The graph object.
+        vertex_labels (dict): Dictionary containing vertex labels.
+        edge_labels (dict): Dictionary containing edge labels.
+
+    Raises:
+        AssertionError: If the labels are incorrect.
+    """
+    for vertex, neighbors in graph.adj_list.items():
+        # Verify vertex labeling
+        max_edge_label = max(edge_labels[(vertex, neighbor)] for neighbor in neighbors)
+        assert vertex_labels[vertex] == max_edge_label, f"Vertex {vertex} labeling is incorrect"
+
+        # Verify edge labeling
+        for neighbor in neighbors:
+            assert edge_labels[(vertex, neighbor)] <= max(vertex_labels[vertex], vertex_labels[neighbor]), \
+                f"Edge label between {vertex} and {neighbor} is incorrect"
+
+
+def main(n):
     # Initialize graph
     graph = Graph(n)
 
@@ -77,7 +104,7 @@ def main(n):
         graph.add_edge(0, i, 0)
         graph.add_edge(i, n + i, 0)
         graph.add_edge(i, 2 * n + i, 0)
-    
+
     # Assign labels to vertices and edges
     vertex_labels, edge_labels = assign_labels(graph)
 
@@ -88,34 +115,12 @@ def main(n):
     print("Edge Labels:")
     for edge, label in edge_labels.items():
         print(f"Edge {edge}: Label {label}")
-    
-    '''
-        # Visualize graph using networkx library
-    G = nx.Graph()
-    for vertex, neighbors in graph.adj_list.items():
-        for neighbor in neighbors:
-            G.add_edge(vertex, neighbor, label=edge_labels[(vertex, neighbor)])
 
-    pos = nx.spring_layout(G)
-    nx.draw(G, pos, with_labels=True, labels=vertex_labels, node_size=1000)
-    edge_labels = nx.get_edge_attributes(G, 'label')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-    plt.title('Homogeneous Amalgamated Star Graph with Edge Irregular K-Labeling')
-    plt.show()
-    
-    '''
-
-
-def test_code(n):
-    start_time = time.time()
-    # Call the main function or relevant code here with the specified value of n
-    main(n)
-    end_time = time.time()
-    execution_time = end_time - start_time
-    print(f"Execution time for n={n}: {execution_time} seconds")
+    # Verify labels
+    verify_labels(graph, vertex_labels, edge_labels)
 
 
 if __name__ == "__main__":
-    # Test the code for increasing values of n
-    for n in range(3, 1000, 20): # Adjust the range and step size as needed
-        test_code(n)
+    # Test the code for a specific value of n
+    n = 5  # Adjust the value of n as needed
+    main(n)
