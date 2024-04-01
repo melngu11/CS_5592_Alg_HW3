@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import math
 
 class Graph:
     def __init__(self, n):
@@ -45,7 +46,7 @@ def edge_irregular_k_labeling(graph, vertex_labels):
     
     for u in range(graph.order):
         for v in graph.adj_list[u]:
-            edge_label = min(vertex_labels[u] + vertex_labels[v], k)
+            edge_label = vertex_labels[u] + vertex_labels[v]
             edge_labels[(u, v)] = edge_label
             edge_labels[(v, u)] = edge_label
 
@@ -64,9 +65,10 @@ def vertex_k_labeling(graph):
     vertex_labels = {}
     k = (3 * graph.n + 1) // 2
     
-    vertex_labels[0] = min(graph.n + 1, k)
+    vertex_labels[0] = 1
     for i in range(1, graph.order):
-        vertex_labels[i] = min(i, k)
+        if i <= k:
+            vertex_labels[i - 1] = i
 
     return vertex_labels
 
