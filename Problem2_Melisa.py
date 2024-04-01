@@ -18,13 +18,18 @@ class Graph:
             raise IndexError(f"Vertex index out of bounds: {u} or {v}")
         self.adj_list[u].append(v)
         self.adj_list[v].append(u)
-        # Assign a unique label for each edge
-        self.edge_labels[(u, v)] = self.edge_label_counter
-        self.edge_labels[(v, u)] = self.edge_label_counter
-        self.edge_label_counter += 1  # Increment for the next edge
+        # Ensure vertex labels are assigned and compute edge weight as their sum
+        edge_weight = self.vertex_labels.get(u, u) + self.vertex_labels.get(v, v)
+        self.edge_labels[(u, v)] = edge_weight
+        self.edge_labels[(v, u)] = edge_weight
 
     def assign_vertex_labels(self):
         self.vertex_labels = {vertex: vertex for vertex in range(self.order)}
+       
+    # Using power of 2 to assign labels to ensure uniqueness    
+    # def assign_vertex_labels(self):
+    # self.vertex_labels = {vertex: 2**vertex for vertex in range(self.order)}
+
 
     def output_labels_and_weights(self, filename='graph2_output.txt'):
         with open(filename, 'w') as file:
@@ -40,6 +45,7 @@ class Graph:
         # The complexity is primarily dictated by the number of edges
         num_edges = self.n + self.n * self.m
         return f"O({num_edges})"
+    
     def build_graph(self):
         # Connecting center to each arm
         for arm in range(1, self.n + 1):
@@ -49,6 +55,7 @@ class Graph:
                 # Correctly index leaves to avoid overlap between arms
                 leaf_node = self.n + (arm - 1) * self.m + leaf
                 self.add_edge(arm, leaf_node)
+                
 def available_memory():
     return psutil.virtual_memory().available
 
