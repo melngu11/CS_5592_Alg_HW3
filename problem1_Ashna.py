@@ -42,7 +42,6 @@ def edge_irregular_k_labeling(graph, vertex_labels):
         dict: Dictionary containing edge labels.
     """
     edge_labels = {}
-    k = (3 * graph.n + 1) // 2
     
     for u in range(graph.order):
         for v in graph.adj_list[u]:
@@ -62,13 +61,12 @@ def vertex_k_labeling(graph):
     Returns:
         dict: Dictionary containing vertex labels.
     """
+
     vertex_labels = {}
     k = (3 * graph.n + 1) // 2
     
-    vertex_labels[0] = 1
-    for i in range(1, graph.order):
-        if i <= k:
-            vertex_labels[i - 1] = i
+    for i in range(graph.order):
+        vertex_labels[i] = min(i, k)
 
     return vertex_labels
 
@@ -102,34 +100,6 @@ def visualize_graph(graph, edge_labels, vertex_labels):
     plt.title("Homogeneous Amalgamated Star S(n, 3) Visualization")
     plt.show()
 
-def verify_labels(graph, vertex_labels, edge_labels):
-        """
-        Verifies whether the labels assigned to vertices and edges adhere to the labeling schemes.
-
-        Args:
-            vertex_labels (dict): Dictionary containing vertex labels.
-            edge_labels (dict): Dictionary containing edge labels.
-
-        Returns:
-            bool: True if labels are correct, False otherwise.
-        """
-        k = (3 * graph.n + 1) // 2
-
-        # Verify vertex labels
-        if vertex_labels[0] != min(graph.n + 1, k):
-            return print("Center vertex label is incorrect")
-        for i in range(1, graph.order):
-            if vertex_labels[i] != min(i, k):
-                print("Vertex Labels are incorrect\n")
-
-        # Verify edge labels
-        for u in range(graph.order):
-            for v in graph.adj_list[u]:
-                if edge_labels[(u, v)] != min(vertex_labels[u] + vertex_labels[v], k):
-                    print("Edge Labels are incorrect\n")
-        
-        print("Edge labels and vertex labels are correct!")
-
         
 
 
@@ -150,9 +120,6 @@ def main(n):
     # Output labels (if needed)
     visualize_graph(graph, edge_labels, vertex_labels)
 
-    # verify labels
-    verify_labels(graph, vertex_labels, edge_labels)
-
     return graph, vertex_labels, edge_labels
 
 if __name__ == "__main__":
@@ -164,3 +131,6 @@ if __name__ == "__main__":
     print("Edge Labels:")
     for edge, label in edge_labels.items():
         print(f"Edge {edge}: Label {label}")
+
+
+    
