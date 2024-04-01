@@ -25,6 +25,11 @@ class Graph:
 
     def assign_vertex_labels(self):
         self.vertex_labels = {vertex: vertex for vertex in range(self.order)}
+       
+    # Using power of 2 to assign labels to ensure uniqueness    
+    # def assign_vertex_labels(self):
+    # self.vertex_labels = {vertex: 2**vertex for vertex in range(self.order)}
+
 
     def output_labels_and_weights(self, filename='graph2_output.txt'):
         with open(filename, 'w') as file:
