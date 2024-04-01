@@ -59,7 +59,7 @@ def assign_labels(graph):
     # Assigning edge labels
     for vertex, neighbors in graph.adj_list.items():
         for neighbor in neighbors:
-            edge_label = max(vertex_labels[vertex], vertex_labels[neighbor])
+            edge_label = vertex + neighbor
             edge_labels[(vertex, neighbor)] = edge_label
             edge_labels[(neighbor, vertex)] = edge_label
 
@@ -120,7 +120,6 @@ def main():
     plt.title('Snowflake Graph with Edge Irregular K-Labeling')
     plt.axis('off')  # Turn off the axis
     plt.show()
-
 
 if __name__ == "__main__":
     main()
