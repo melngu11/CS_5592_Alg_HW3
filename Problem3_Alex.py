@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import time 
 
 class Graph:
     def __init__(self, n):
@@ -12,7 +13,8 @@ class Graph:
         """
         self.n = n
         # The total number of nodes is n branch nodes + 1 center node + 2n leaf nodes
-        self.adj_list = {i: [] for i in range(1 + n + 2 * n)}
+        self.order = 1 + n + 2 * n
+        self.adj_list = {i: [] for i in range(self.order)}
         self.edge_labels = {}  # Dictionary to store edge labels
 
     def add_edge(self, u, v, label):
@@ -41,39 +43,64 @@ def assign_labels(graph):
         graph (Graph): The graph object to which labels will be assigned.
 
     Returns:
-        tuple: A tuple containing dictionaries of vertex labels and edge labels.
+        tuple: A tuple containing dictionaries of vertex labels and unique edge labels.
     """
     vertex_labels = {}  # Dictionary to store vertex labels
     edge_labels = {}  # Dictionary to store edge labels
     k = (1 + graph.n + 2 * graph.n) // 2
 
     # Greedy labeling starting from central vertex
-    vertex_labels[0] = min(graph.n + 1, k)  # Labeling the center vertex
-    for i in range(1, graph.n + 1):
-        vertex_labels[i] = min(i, k)
-        leaf1 = graph.n + 2 * (i - 1) + 1
-        leaf2 = graph.n + 2 * (i - 1) + 2
-        vertex_labels[leaf1] = min(i, k)
-        vertex_labels[leaf2] = min(i, k)
+    vertex_labels[0] = 1 # min(graph.n + 1, k)  # Labeling the center vertex
+    
+    # Output vertex labels
+    inner_verts = 11
+    for vert in range(1, graph.n + 1):
+        vertex_labels[vert] = inner_verts
+        inner_verts += 4
+ 
+    for i in range(1, graph.n+1):
+        branch_val = vertex_labels[i]
+        for j in range(1, 4, 2):
+            vert = vert + 1
+            vertex_labels[vert] = branch_val + j
+
+
 
     # Assigning edge labels
     for vertex, neighbors in graph.adj_list.items():
         for neighbor in neighbors:
-            edge_label = vertex + neighbor
+            edge_label = vertex_labels[vertex] + vertex_labels[neighbor]
             edge_labels[(vertex, neighbor)] = edge_label
             edge_labels[(neighbor, vertex)] = edge_label
 
     return vertex_labels, edge_labels
 
+def verify_unique_edge_values(edge_labels):
+    """
+    Verifies if all edge values are unique and prints the maximum edge weight.
+
+    Args:
+        edge_labels (dict): A dictionary of edge labels.
+
+    Returns:
+        bool: True if all edge values are unique, False otherwise.
+    """
+    edge_values = list(edge_labels.values())
+    unique_values = len(edge_values)/2 == len(set(edge_values)) + 1
+    max_edge_value = max(edge_values)
+    print(f"All edge values are unique: {unique_values}")
+    print(f"Maximum edge weight value: {max_edge_value}")
 
 def main():
+    start_time = time.time()  # Start timing
+
     # Number of branch nodes
     n = int(input("Enter the value of n: "))
 
     # Initialize graph
     graph = Graph(n)
 
-    # Adding edges for the modified star graph
+    # Adding edges for the Snowflake graph
     for i in range(1, n + 1):
         graph.add_edge(0, i, 0)  # Connect branch nodes to center
         leaf1 = n + 2 * (i - 1) + 1
@@ -86,7 +113,28 @@ def main():
 
     # Assign labels to vertices and edges
     vertex_labels, edge_labels = assign_labels(graph)
-
+    
+    # printing the graph labeling compute time 
+    end_time = time.time()  # End timing
+    print(f"Computation time (before plotting): {end_time - start_time} seconds")
+    
+    
+    # verifying edge weight uniqueness (for debugging)
+    verify_unique_edge_values(edge_labels)
+    
+    # printing edge and vertex labels (for debugging)
+    print("Vertex Labels:")
+    for vertex, label in vertex_labels.items():
+        print(f"Vertex {vertex}: Label {label}")
+    print("Edge Labels:")
+    i = 1
+    for edge, label in edge_labels.items():
+        if i == 1:
+            print(f"Edge {edge}: Label {label}")
+            i = 0
+        else:
+            i = 1
+    
     # Visualize graph using networkx library
     plt.figure(figsize=(12, 12))  # Increase the figure size
     G = nx.Graph()
@@ -114,12 +162,12 @@ def main():
     # Merge all positions together
     pos = {**center_pos, **branch_pos, **leaf_pos}
 
-
-    nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', width=2, linewidths=1, node_size=700, font_size=10)
+    nx.draw(G, pos, labels = vertex_labels, node_color='lightblue', edge_color='gray', width=2, linewidths=1, node_size=700, font_size=10)
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8)
     plt.title('Snowflake Graph with Edge Irregular K-Labeling')
     plt.axis('off')  # Turn off the axis
     plt.show()
+
 
 if __name__ == "__main__":
     main()
