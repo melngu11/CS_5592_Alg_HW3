@@ -19,59 +19,19 @@ if n % 4 == 0 or n % 4 == 2 or n % 4 == 3:
         elif math.ceil(n / 4) + 1 <= i <= n:
             vertex_labels[vertex] = 2 * math.ceil(n / 4) + i
     
-
-    
-    '''
-    for i in range(n + 1, order + 1):
-        vertex = i
+    # labeling all the external vertices (this should go from 9 to 24)
+    vertex += 1
+    for i in range(1, (math.ceil(n / 4) + 1)):
+        for j in range(1, 3):  
+                vertex_labels[vertex] =  j + 1
+                vertex = vertex + 1
+   
+    for i in range((math.ceil(n / 4) + 1), n + 1):
         for j in range(1, 3):
-            if 1 <= i <= math.ceil(n / 4) + 1:
-                vertex_labels[]
-
-
-    for j in range(1, 3):
-        for i in range(1, math.ceil(n / 4) + 1):
-            vertex = i
-            vertex_labels[vertex] = j + 1
-        for i in range(math.ceil(n / 4) + 1, n + 1):
-            vertex = i
             vertex_labels[vertex] = n + i + j - 1 - 2 * math.ceil(n / 4)
-    '''   
-    '''
-        for i in range(n + 1, order + 1):
-        vertex = i
-        iter += 1
-        if 1 <= i <= math.ceil(n / 4):
-            vertex_labels[vertex] = j + 1
-        elif math.ceil(n / 4) + 1 <= i <= n:
-            vertex_labels[vertex] = n + i + j - 1 - 2 * math.ceil(n / 4)
-    
-    '''
-    '''
-        # labeling all the external vertices (leaf nodes, for this case it will go from 9 to 24)
-    for i in range(n + 1, order + 1):
-        vertex = i
-        for j in range(1, 3):
-            if 1 <= i <= math.ceil(n / 4) + 1:
-                vertex_labels[vertex] = j + 1
-    
-    '''
+            vertex = vertex + 1
 
     
-    for i in range(1, math.ceil(n / 4) + 1):
-        vertex = i + n
-        print("Vertex: ", vertex)
-        for j in range(1, 3):
-            print("J: ", j)
-            vertex_labels[vertex] = vertex_labels[i] + j
-            break
-
-
-    
-
-    
-
-
 # Output vertex labels
 print("Vertex Labels:")
 for vertex, label in vertex_labels.items():
