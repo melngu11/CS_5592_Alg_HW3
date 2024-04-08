@@ -79,15 +79,19 @@ class Graph:
 
 def main():
     n = 8
-    order = 3 * n + 1
-    k = math.ceil((3 * n + 1) / 2)
+    m = 3
+    order = m * n + 1
+    k = math.ceil((m * n + 1) / 2)
     graph = Graph(n, k, order)
+
+    outer_verts = n
 
     # Adding edges for the star graph
     for i in range(1, n + 1):
         graph.add_edge(0, i, 0)  # Connect central vertex to inner vertices
-        graph.add_edge(i, n + i, 0)  # Connect inner vertices to their first external vertex
-        graph.add_edge(i, n + i + 1, 0)  # Connect inner vertices to their second external vertex
+        for j in range(1, m):
+            outer_verts += 1
+            graph.add_edge(i, outer_verts, 0) # Connect inner vertices to their external vertices
     
     vertex_labels = graph.vertex_k_labeling()
     adj_list = graph.get_adj_list()
