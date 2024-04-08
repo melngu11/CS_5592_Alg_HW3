@@ -1,8 +1,9 @@
+# Importing necessary libraries
 import math
 import networkx as nx
 import matplotlib.pyplot as plt
 
-
+# Class definition for a graph
 class Graph:
     def __init__(self, n, k, order):
         """
@@ -10,35 +11,44 @@ class Graph:
 
         Args:
             n (int): The number of inner vertices.
-            k (int): k value, all vertex labels need to be less than or equal to this value
-            order (int): The total number of vertices
+            k (int): The maximum value a vertex label can take.
+            order (int): The total number of vertices.
         """
+        # Initializing graph parameters
         self.n = n
         self.k = k
         self.order = order
+        # Initializing data structures to represent the graph
         self.adj_list = {i: [] for i in range(order)}  # Adjacency list representation of the graph
-        self.edge_weights = {} # Dictionary to store edge weights
-        self.vertex_labels = {i: None for i in range(order)} # Dictionary to store vertex labels
+        self.edge_weights = {}  # Dictionary to store edge weights
+        self.vertex_labels = {i: None for i in range(order)}  # Dictionary to store vertex labels
     
     def add_edge(self, u, v, weight):
         """
-        Adds an edge between two nodes with a given label.
+        Adds an edge between two nodes with a given weight.
 
         Args:
             u (int): One end of the edge.
             v (int): The other end of the edge.
-            label (int): The label to be assigned to the edge.
+            weight (int): The weight to be assigned to the edge.
         """
+        # Adding edge to the adjacency list
         self.adj_list[u].append(v)
         self.adj_list[v].append(u)
-        self.edge_weights[(u, v)] = weight  # Storing the edge weight
-        self.edge_weights[(v, u)] = weight  # Storing the edge weight for the opposite direction
+        # Storing edge weight in both directions
+        self.edge_weights[(u, v)] = weight
+        self.edge_weights[(v, u)] = weight
 
     def vertex_k_labeling(self):
+        """
+        Calculates vertex labels for the graph.
+        """
+        # Setting label for central vertex
         self.vertex_labels[0] = 1
+
         # Case 1
         if self.n % 4 == 0 or self.n % 4 == 2 or self.n % 4 == 3:
-            # labeling all the internal vertices (for this case it will go from 1, 8)
+            # Labeling internal vertices
             for i in range(1, self.n + 1):
                 vertex = i
                 if 1 <= i <= math.ceil(self.n / 4) + 1:
@@ -46,7 +56,7 @@ class Graph:
                 elif math.ceil(self.n / 4) + 1 <= i <= self.n:
                     self.vertex_labels[vertex] = 2 * math.ceil(self.n / 4) + i
     
-            # labeling all the external vertices (this should go from 9 to 24)
+            # Labeling external vertices
             vertex += 1
             for i in range(1, (math.ceil(self.n / 4) + 1)):
                 for j in range(1, 3):  
@@ -57,6 +67,7 @@ class Graph:
                 for j in range(1, 3):
                     self.vertex_labels[vertex] = self.n + i + j - 1 - 2 * math.ceil(self.n / 4)
                     vertex = vertex + 1
+        
         return self.vertex_labels
     
     def calculate_edge_weights(self):
@@ -73,15 +84,20 @@ class Graph:
         return self.edge_weights
     
     def get_adj_list(self):
+        """
+        Returns the adjacency list of the graph.
+        """
         return self.adj_list
-    
 
-
+# Main function
 def main():
+    # Graph parameters
     n = 8
     m = 3
     order = m * n + 1
     k = math.ceil((m * n + 1) / 2)
+    
+    # Creating graph object
     graph = Graph(n, k, order)
 
     outer_verts = n
@@ -93,14 +109,17 @@ def main():
             outer_verts += 1
             graph.add_edge(i, outer_verts, 0) # Connect inner vertices to their external vertices
     
+    # Calculating vertex labels, adjacency list, and edge weights
     vertex_labels = graph.vertex_k_labeling()
     adj_list = graph.get_adj_list()
     edge_weights = graph.calculate_edge_weights()
 
+    # Printing vertex labels
     print("===== Vertex Labels =====")
     for vertex, label in vertex_labels.items():
         print(f"Vertex: {vertex}, Label: {label}")
     
+    # Printing adjacency list
     print("===== Adjacency List =====")
     for vertex, neighbors in adj_list.items():
         # Convert the list of neighbors to a string for printing
@@ -108,14 +127,15 @@ def main():
         # Print the vertex and its neighbors
         print(f"Vertex: {vertex}, neighbors: [{neighbors_str}]")
     
+    # Printing edge weights
     print("===== Edge Weights =====")
     for edge, weight in edge_weights.items():
         print(f"Edge: {edge}, Weight: {weight}")
     
-    
     # Creating a NetworkX graph
     G = nx.Graph()
     G.add_nodes_from(range(order))
+    
     # Adding edges from adjacency list
     for vertex, neighbors in adj_list.items():
         for neighbor in neighbors:
@@ -129,19 +149,13 @@ def main():
 
     # Drawing the graph
     nx.draw(G, pos, with_labels=False, node_color='skyblue', node_size=1500)
+    
     # Drawing edge labels
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_weights, font_color='red')
 
     # Displaying the graph
     plt.show()
-    
 
-
+# Entry point of the program
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
