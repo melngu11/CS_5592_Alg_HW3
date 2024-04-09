@@ -2,33 +2,81 @@ import networkx as nx
 import psutil
 import matplotlib.pyplot as plt
 import time
+import math
 
 class Graph:
     def __init__(self, n, m):
         self.n = n  # Number of arms
         self.m = m  # Number of leaves per arm
-        self.order = n * m + n + 1  # Total number of vertices
+        self.order = n * m + 1  # Total number of vertices
         self.adj_list = {i: [] for i in range(self.order)}
         self.edge_labels = {}
         self.vertex_labels = {}  # Stores vertex labels
-        self.edge_label_counter = 1  # Initialize edge label counter
 
-    def add_edge(self, u, v):
-        if u not in self.adj_list or v not in self.adj_list:
-            raise IndexError(f"Vertex index out of bounds: {u} or {v}")
+    def calculate_edge_weights(self):
+        """
+        Calculates edge weights based on vertex labels and adjacency list.
+        """
+        for vertex, neighbors in self.adj_list.items():
+            for neighbor in neighbors:
+                # Calculate edge weight by summing up the labels of the two vertices
+                weight = self.vertex_labels[vertex] + self.vertex_labels[neighbor]
+                self.edge_weights[(vertex, neighbor)] = weight
+                self.edge_weights[(neighbor, vertex)] = weight
+        
+        return self.edge_weights
+    def add_edge(self, u, v, weight):
+        """
+        Adds an edge between two nodes with a given weight.
+
+        Args:
+            u (int): One end of the edge.
+            v (int): The other end of the edge.
+            weight (int): The weight to be assigned to the edge.
+        """
+        # Adding edge to the adjacency list
         self.adj_list[u].append(v)
         self.adj_list[v].append(u)
-        # Ensure vertex labels are assigned and compute edge weight as their sum
-        edge_weight = self.vertex_labels.get(u, u) + self.vertex_labels.get(v, v)
-        self.edge_labels[(u, v)] = edge_weight
-        self.edge_labels[(v, u)] = edge_weight
+        # Storing edge weight in both directions
+        self.edge_weights[(u, v)] = weight
+        self.edge_weights[(v, u)] = weight
+        
+    def vertex_k_labeling(self):
+        """
+        Generalizes vertex labels for any m and n >= 3.
+        """
+        self.vertex_labels[0] = 1  # Central vertex label
 
-    def assign_vertex_labels(self):
-        self.vertex_labels = {vertex: vertex for vertex in range(self.order)}
-       
-    # Using power of 2 to assign labels to ensure uniqueness    
-    # def assign_vertex_labels(self):
-    # self.vertex_labels = {vertex: 2**vertex for vertex in range(self.order)}
+        # Determining labels for internal vertices (arm bases)
+        # and ensuring unique edge weights when combined with the central node or leaf nodes.
+        for i in range(1, self.n + 1):
+            if 1 <= i <= math.ceil(self.n / 4) + 1:
+                self.vertex_labels[i] = 3 * i - 2
+            else:
+                self.vertex_labels[i] = 2 * math.ceil(self.n / 4) + i
+
+        # Labeling leaves such that each leaf has a unique sum with its parent arm vertex.
+        vertex = self.n + 1
+        for i in range(1, self.n + 1):
+            base_label = self.vertex_labels[i]
+            increment = max(self.n, self.m)  # To ensure a spread that avoids overlap in sums.
+            for j in range(1, self.m + 1):
+                # Incrementing label ensures uniqueness across different arms' leaves.
+                self.vertex_labels[vertex] = base_label + j * increment
+                vertex += 1
+
+        return self.vertex_labels
+
+
+    def build_graph(self):
+        self.vertex_k_labeling()  # Assign labels before building edges
+        # Connect center to each arm
+        for arm in range(1, self.n + 1):
+            self.add_edge(0, arm)
+            # Connect arm to its leaves
+            for leaf in range(1, self.m + 1):
+                leaf_node = self.n + (arm - 1) * self.m + leaf
+                self.add_edge(arm, leaf_node)
 
 
     def output_labels_and_weights(self, filename='graph2_output.txt'):
@@ -47,12 +95,12 @@ class Graph:
         return f"O({num_edges})"
     
     def build_graph(self):
+        self.vertex_k_labeling()  # Assign labels before building edges
         # Connecting center to each arm
         for arm in range(1, self.n + 1):
             self.add_edge(0, arm)
             # Connecting arm to its leaves
             for leaf in range(1, self.m + 1):
-                # Correctly index leaves to avoid overlap between arms
                 leaf_node = self.n + (arm - 1) * self.m + leaf
                 self.add_edge(arm, leaf_node)
                 
